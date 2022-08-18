@@ -1,37 +1,5 @@
-// 参考文章： https://github.com/mqyqingfeng/Blog/issues/26
-// 节流：一段时间内只会触发一次的操作
-// 实现的方式主流的有两种
-// 时间戳
-// 定时器
-
-//---------------------- 时间戳实现
-function throttle(func, wait) {
-  var previous = 0
-  var _self = this
-  return function () {
-    var args = arguments
-    var now = +new Date()
-    if (now - previous > wait) {
-      func.apply(_self, args)
-      previous = now
-    }
-  }
-}
-// ---------------------- 定时器实现
-function throttle(func, wait) {
-  var timer,
-    previous = 0
-  return function () {
-    var args = arguments
-    var _self = this
-    if (!timer) {
-      timer = setTimeout(function () {
-        timer = null
-        func.apply(_self, args)
-      }, wait)
-    }
-  }
-}
+// +new Date() === new Date().getTime()
+// 解释 + 转换的原因：https://github.com/mqyqingfeng/Blog/issues/26#issuecomment-324270420
 
 // 参考文章： https://github.com/xiaochengzi6/Blog/issues/25
 // 防抖：每次触发都会延迟一段时间去执行
@@ -154,3 +122,125 @@ function debounce(func, wait, immediate) {
 // 3 事件的响应是在触发后响应还是等待一段时间响应
 // 4 需要返回值吗?
 // 5 需要取消这次的防抖？
+
+
+// 参考文章： https://github.com/mqyqingfeng/Blog/issues/26
+// 节流：一段时间内只会触发一次的操作
+// 实现的方式主流的有两种
+// 时间戳
+// 定时器
+
+//---------------------- 时间戳实现
+function throttle(func, wait) {
+  var previous = 0
+  var _self = this
+  return function () {
+    var args = arguments
+    var now = +new Date()
+    if (now - previous > wait) {
+      func.apply(_self, args)
+      previous = now
+    }
+  }
+}
+// ---------------------- 定时器实现
+function throttle(func, wait) {
+  var timer
+  return function () {
+    var args = arguments
+    var _self = this
+    if (!timer) {
+      timer = setTimeout(function () {
+        timer = null
+        func.apply(_self, args)
+      }, wait)
+    }
+  }
+}
+
+// 这两种方法的特点：
+// 使用时间戳的第一次触发会立即执行，停止触发后没有办法再执行事件
+// 使用定时器的第一次触发后会等待一段时间才能执行，停止触发后依然会执行一次
+
+// 结合上面特点：第一次触发事件立刻响应，停止触发再执行一次
+
+function throttle(func, wait){
+ var timeout, context, args, result
+ var previous = 0
+ 
+ var later = function (){
+  previous = +new Date()
+  timeout = null
+  func.apply(context, args)
+ }
+
+ var throttle = function(){
+  var now = +new Date()
+  var remaining = wait -(now - previous)
+  context = this
+  args= arguments
+  // 第一次 || (再触发时间超过 wait)
+  if(remaining <= 0 || remaining > wait){
+    if(timeout){
+      clearTimeout(timeout)
+      timeout = null
+    }
+    previous = now
+    result = func.apply(context, args)
+  }
+  // 再触发时间不超过 wait 并且timer 没有定时
+  else if (!timeout){
+    timeout = setTimeout(later, remaining)
+  }
+  return result
+ }
+
+ return throttle
+}
+
+// 优化：第一次触发最后一次不触发，或者最后一次触发，第一次不触发
+// options= {leading: Boolean, trailing: Boolean}
+function throttle (func, wait, options){
+  var timeout, context, args, result
+  var previous = 0
+  if(!options) options = {}
+  var later = function (){
+    previous = options.leading === false ? 0 : +new Date()
+    timeout = null
+    func.apply(context, args)
+    if(!timeout) context = args = null /*释放内存*/
+  }
+
+  function throttled(){
+    var now = +new Date()
+    if (!previous && options.leading === false) previous = now;
+    var remaining = wait - (now - previous)
+    // 这里兼容了修改系统时间也会去响应事件(remaining > wait)
+    if((remaining <= 0 || remaining > wait) && options.leading){
+      // 处理timeout定时器
+      if(timeout){
+        clearTimeout(timeout)
+        timeout = null
+      }
+      previous = now
+      result = func.apply(context, args)
+      if(timeout) context = args = null
+    }
+    else if(!timeout && options.trailing !== false){
+      timeout = setTimeout(later, remaining)
+    }
+    return result
+  }
+  // 取消响应
+  throttled.cancel = function (){
+    clearTimeout(timeout)
+    previous = 0
+    timeout = null
+  }
+
+  return throttled
+}
+
+//----------------------总结----------------------
+//  节流的主流实现方法有两种 每种都有不同的特点，使用时间戳的问题第一次会立即响应，停止触发事件后不会响应最后的一次触发请求
+//  使用定时器的第一次不会立即响应，最后一次请求会延迟响应
