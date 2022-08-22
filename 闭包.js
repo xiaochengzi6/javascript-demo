@@ -45,17 +45,17 @@ data[0]()
 data[1]()
 data[2]()
 
-// 接受集合的函数
+// 接受集合的函数dd
 function registerMode(name) {
   console.log(name)
 }
 
-// function registerModes(modes) {
-//   modes.forEach(registerMode, modes)
-// }
+function registerModes(modes) {
+  modes.forEach(registerMode, modes)
+}
 
-// // 用法
-// registerModes(['roster', 'accounts', 'groups'])
+// 用法
+registerModes(['roster', 'accounts', 'groups'])
 
 // 自复制函数的声明
 function modes(mode) {
