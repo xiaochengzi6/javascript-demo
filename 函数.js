@@ -1,6 +1,23 @@
-// 自复制函数
-;(function selfReplicative() {
-  return selfReplicative
+/**
+ * 自应用函数
+ */
+ (function selfApplicative(funArg) {
+
+  if (funArg && funArg === selfApplicative) {
+    console.log('self-applicative');
+    return;
+  }
+
+  selfApplicative(selfApplicative);
+
+})();
+
+
+/**
+ * 自复制函数
+ */
+(function selfApplicative() {
+  return selfApplicative
 })()
 
 // 特点；可以让仅接收集合一个参数的来接收集合本身
@@ -45,3 +62,6 @@ foo() // 10 – 使用静态和动态作用域的时候
   var z = 30
   funArg() // 10 – 静态作用域, 30 – 动态作用域
 })(foo)
+
+
+
