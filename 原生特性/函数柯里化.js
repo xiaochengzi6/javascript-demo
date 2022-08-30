@@ -1,7 +1,7 @@
 // 参考文章：https://juejin.cn/post/6844903882208837645
 
 // 柯里化的概念：
-// 是将使用多个参数的一个函数转换成使用一个参数的函数的技术
+// 是将使用多个参数的一个函数转换成一系列使用一个参数的函数的技术
 
 // 函数柯里化的核心：
 // 接受参数，参数达到相应个数时候就可以去执行原函数
@@ -25,6 +25,7 @@ function _curry(fn, len, ...args) {
     if (_args.length >= len) {
       return fn.apply(this, _args)
     } else {
+      // 递归调用
       return _curry.call(this, fn, len, ..._args)
     }
   }
@@ -40,7 +41,7 @@ _fn(1)(2)(3, 4, 5) // print: 1,2,3,4,5
 _fn(1, 2)(3, 4)(5) // print: 1,2,3,4,5
 _fn(1)(2)(3)(4)(5) // print: 1,2,3,4,5
 
-// 方法
+// 方法 2
 
 function curry(fn, len) {
   return _curry.call(this, fn, len)
@@ -71,13 +72,28 @@ _fn(1)(2)(3)(4)(5) // print: 1,2,3,4,5
 // (1)(2)(3) => [1,2,3]
 // (1)(_, 2)(3) => [1,3,2]
 
+/**
+ * @param {*} fn 回调函数
+ * @param {*} [length=fn.length] 回调函数所需要参数的数量
+ * @param {*} [holder=curry] 占位符
+ */
 function curry(fn, length = fn.length, holder = curry) {
   return _curry.call(this, fn, length, holder, [], [])
 }
 
+/**
+ *
+ * @param {*} fn 回调函数
+ * @param {*} length 回调函数参数的长度
+ * @param {*} holder 占位符
+ * @param {*} args 接收参数数组
+ * @param {*} holders 占位符数组
+ * @return {*}
+ */
 function _curry(fn, length, holder, args, holders) {
   return function (..._args) {
     let params = args.slice()
+    // 代表这次的占位符数组
     let _holders = holders.slice()
 
     _args.forEach((arg, i) => {
@@ -109,6 +125,19 @@ function _curry(fn, length, holder, args, holders) {
     }
   }
 }
+let fn = function (a, b, c, d, e) {
+  console.log([a, b, c, d, e])
+}
+
+let _ = {} // 定义占位符
+let _fn = curry(fn, 5, _) // 将函数柯里化，指定所需的参数个数，指定所需的占位符
+
+_fn(1, 2, 3, 4, 5) // print: 1,2,3,4,5
+_fn(_, 2, 3, 4, 5)(1) // print: 1,2,3,4,5
+_fn(1, _, 3, 4, 5)(2) // print: 1,2,3,4,5
+_fn(1, _, 3)(_, 4, _)(2)(5) // print: 1,2,3,4,5
+_fn(1, _, _, 4)(_, 3)(2)(5) // print: 1,2,3,4,5
+_fn(_, 2)(_, _, 4)(1)(3)(5) // print: 1,2,3,4,5
 
 // 函数柯里化抽离方法
 

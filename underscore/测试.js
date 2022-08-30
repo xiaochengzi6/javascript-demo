@@ -1,12 +1,9 @@
-var obj = function (value) {
-  if (!(this instanceof obj)) return new obj(value)
-  this.wrapped = value
-}
+var _ = require('./index')
+// var _ = require('./index_test_')
+// 面向函数式调用
+console.log(_.reverse('hello'))
 
-obj.functions = function () {
-  return 1
-}
+// 面向对象式调用
+console.log(_('hello').reverse())
 
-obj.prototype.functions = obj.functions
-
-console.log(obj.prototype.functions())
+console.log(_.chain([1, 2, 3, 4]).push(2))
