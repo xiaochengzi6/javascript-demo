@@ -18,7 +18,7 @@
     }
     exports._ = _
   } else {
-    root._ = _
+    var previousUnderscore = (root._ = _)
   }
 
   _.VERSION = '0.1'
@@ -129,6 +129,11 @@
   }
 
   _.mixin(_)
+
+  _.noConflict = function () {
+    root._ = previousUnderscore
+    return this
+  }
 
   _.prototype.value = function () {
     return this._wrapped
