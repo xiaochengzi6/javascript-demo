@@ -1,7 +1,9 @@
 {
   "dependencies": {
+    "dayjs": "^1.11.6",
     "eslint": "^8.0.1",
     "global": "^4.4.0",
+    "moment": "^2.29.4",
     "underscore": "^1.13.4"
   },
   "preview": true,
