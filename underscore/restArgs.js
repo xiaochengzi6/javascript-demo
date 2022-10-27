@@ -1,7 +1,54 @@
-// value == null 既可以排除undefined又可以排除null
+// est5 环境下对于参数的解决方法
 
-// es5环境下实现 rest 参数 function (a, b, c, ...args) {} ==> restArgs(function(a, b, c, d, e, f){ rest = [d, e, f] })
+// 需要使用 restArgs 优化的函数
+function partial(fn) {
+  var args = [].slice.call(arguments, 1)
+  return function () {
+    var newArgs = args.concat([].slice.call(arguments))
+    return fn.apply(this, newArgs)
+  }
+}
 
+// 使用 rest 参数
+function partial(fn, ...args) {
+  return function (...partialArgs) {
+    var _Args = args.concat(partialArgs)
+    return fn.apply(this, _Args)
+  }
+}
+
+// es5 环境下模仿 rest 参数
+function restArgs(fn) {
+  return function () {
+    var startIndex = fn.length - 1
+    var length = arguments.length - startIndex
+
+    var rest = Array(length)
+    var index = 0
+
+    for (; index < length; index++) {
+      rest[index] = arguments[startIndex + index]
+    }
+
+    var args = Array(startIndex + 1)
+    for (index = 0; index < startIndex; index++) {
+      args[index] = arguments[index]
+    }
+    args[startIndex] = rest
+
+    return fn.apply(this, args)
+  }
+}
+
+// 等同于
+
+function _restArgs(fn, ...args) {
+  return fn.apply(this, args)
+}
+
+// restArgs 返回的函数主要用于接收参数进而处理，可以理解为在外层包裹了一层处理传入的参数
+
+// 核心思想：
 // ----------0, 1, 2, 3, 4, 5
 // arguments(a, b, c, d, e, f)
 // ----------0, 1, 2, startIndex(3), 4, EndIndex(5)
@@ -9,111 +56,85 @@
 // rest ==> [startIndex, ...., EndIndex]
 // args ==> [0, 1, 2, rest]
 
-// function restArgs(func) {
-//   return function () {
-//     var startIndex = func.length - 1
-//     var length = arguments.length - startIndex
+// 最后: return fn.apply(this, args)
 
-//     var rest = Array(length)
-//     var index = 0
+// 代码逻辑优化
 
-//     for (; index < length; index++) {
-//       rest[index] = arguments[index + startIndex]
-//     }
+/**
+ * @param {*} fn 回调函数
+ * @param {*} startIndex 指定从那个位置开始描述剩余参数 rest
+ */
+function restArgs(fn, startIndex) {
+  startIndex = startIndex == null ? fn.length - 1 : +startIndex
+  return function () {
+    var length = Math.max(arguments.length - startIndex, 0)
+    var rest = Array(length)
+    var index = 0
 
-//     var args = Array(startIndex + 1)
-//     for (index = 0; index < startIndex; index++) {
-//       args[index] = arguments[index]
-//     }
+    // 循环后存储 rest
+    for (; index < length; index++) {
+      rest[index] = arguments[startIndex + index]
+    }
 
-//     args[startIndex] = rest
+    // 组合 rest 参数的参数
+    var args = Array(length + 1)
+    for (index = 0; index < startIndex; index++) {
+      args[index] = arguments[index]
+    }
+    args[startIndex] = rest
 
-//     return func.apply(this, args)
-//   }
-// }
+    return fn.apply(this, args)
+  }
+}
 
-// 由于函数的参数并没有强制性所以 startIndex 也有可能是 负数
-// 增加一个参数指定 startIndex ,如果没有就默认最后一个
-
-function restArgs(func, startIndex) {
-  startIndex = startIndex == null ? func.length - 1 : +startIndex
+// 性能优化
+function restArgs(fn, startIndex) {
+  startIndex = startIndex == null ? fn.length - 1 : +startIndex
   return function () {
     var length = Math.max(arguments.length - startIndex, 0)
     var rest = Array(length)
     var index = 0
 
     for (; index < length; index++) {
-      rest[index] = arguments[index + startIndex]
+      rest[index] = arguments[startIndex + index]
     }
 
-    // 增加这一步是为了提高性能
+    // 使用 call 比使用 apply 性能要高
+    // restArgs 外层的 startIndex 用于指定返回函数 rest 的起始位
     switch (startIndex) {
+      case 0:
+        return fn.call(this, rest)
       case 1:
-        return func.call(this, rest)
+        return fn.call(this, arguments[0], rest)
       case 2:
-        return func.call(this, arguments[0], rest)
-      case 3:
-        return func.call(this, arguments[0], arguments[1], rest)
+        return fn.call(this, arguments[0], arguments[1], rest)
     }
 
-    var args = Array(startIndex + 1)
+    var args = Array(length + 1)
     for (index = 0; index < startIndex; index++) {
       args[index] = arguments[index]
     }
-
     args[startIndex] = rest
-    return func.apply(this, args)
+
+    return fn.apply(this, args)
   }
 }
 
-// console.log(
-//   restArgs(function func(a, b, c, d, e, f, g, h, i, j, k, m, n) {
-//     return void 0
-//   }, 5)(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-// )
-
-// var restArgs = function (func, startIndex) {
-//   startIndex = startIndex == null ? func.length - 1 : +startIndex
-//   return function () {
-//     var length = Math.max(arguments.length - startIndex, 0),
-//       rest = Array(length),
-//       index = 0
-
-//     for (; index < length; index++) {
-//       rest[index] = arguments[index + startIndex]
-//     }
-
-//     // 增加的部分
-//     switch (startIndex) {
-//       case 0:
-//         return func.call(this, rest)
-//       case 1:
-//         return func.call(this, arguments[0], rest)
-//       case 2:
-//         return func.call(this, arguments[0], arguments[1], rest)
-//     }
-
-//     var args = Array(startIndex + 1)
-//     for (index = 0; index < startIndex; index++) {
-//       args[index] = arguments[index]
-//     }
-
-//     args[startIndex] = rest
-//     return func.apply(this, args)
-//   }
-// }
-
-// 有问题 -- 调用关系 传参是怎么传的没搞懂
-var partial = restArgs(function (fn, args) {
-  return restArgs(function (partialArgs) {
-    var newArgs = args.concat(partialArgs)
-    return fn.apply(this, newArgs)
+// 这里使用了 es5 版的 partial 函数
+var partial = restArgs(function a(fn, args) {
+  return restArgs(function b(partialArgs) {
+    console.log(typeof args)
+    var _args = args.concat(partialArgs)
+    return fn.apply(this, _args)
   })
 })
 
-function add(a, b, c) {
-  return a + b + c
+var addValue = function (a, b, c) {
+  var result = a + b + c
+  console.log(result)
+  return result
 }
+var fn = partial(addValue, 1)
+fn(2, 3)
 
-var addOne = partial(add, 1)
-console.log(addOne(2, 3)) // 6
+// 这里使用 restArgs 对 a 函数的参数处理后返回了一个 包裹了 a 函数的函数

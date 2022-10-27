@@ -1,6 +1,10 @@
 ;(function () {
   /*浏览器/WebWorker node/node沙箱 小程序*/
-  var root = (typeof self === 'object' && self === self.window && self) || (typeof global === 'object' && global.global === global && global) || this || {}
+  var root =
+    (typeof self === 'object' && self === self.window && self) ||
+    (typeof global === 'object' && global.global === global && global) ||
+    this ||
+    {}
 
   var ArrayProto = Array.prototype
 
@@ -18,7 +22,7 @@
     }
     exports._ = _
   } else {
-    root._ = _
+    var previousUnderscore = (root._ = _)
   }
 
   _.VERSION = '0.1'
@@ -33,7 +37,13 @@
   // 判断是否是数组
   _.isArrayLike = function (obj) {
     var length = obj.length
-    if (obj && length >= 0 && length === Math.floor(length) && length === Math.abs(length) && length < MAX_ARRAY_INDEX) {
+    if (
+      obj &&
+      length >= 0 &&
+      length === Math.floor(length) &&
+      length === Math.abs(length) &&
+      length < MAX_ARRAY_INDEX
+    ) {
       return true
     }
     return false
@@ -129,6 +139,11 @@
   }
 
   _.mixin(_)
+
+  _.noConflict = function () {
+    root._ = previousUnderscore
+    return this
+  }
 
   _.prototype.value = function () {
     return this._wrapped

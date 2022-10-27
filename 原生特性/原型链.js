@@ -5,7 +5,7 @@
 // 循环需要注意的有两点： 1、判出条件 2、循环要素
 function search(obj, property) {
   let current = obj
-  if (current) {
+  if (!current) {
     throw new Error('无对象')
   }
 
