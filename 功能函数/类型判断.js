@@ -142,6 +142,7 @@ function Typeof(target) {
   if (type === 'object') {
     type = Object.prototype.toString.call(target).slice(8, -1)
 
+    // 使用 Object.create(null) 创建的对象为空对象 
     // 处理空对象
     if (type !== 'object') return type
     let prop, Ctor
@@ -184,6 +185,8 @@ function Typeof(target) {
 // for in  和 for of 的区别
 // 前者是 es5 的后者是 es6 中的语法
 // 前者是遍历对象中键值对中的键名的，比如遍历对象就是返回对象的属性名，遍历数组返回数组的下标
+// for in 是任意顺序迭代对象的可遍历属性
+// for of 是顺序遍历可迭代对象定义要迭代的数据
 for (var key in { str: '1', num: 2, boo: true }) {
   console.log(key)
 }

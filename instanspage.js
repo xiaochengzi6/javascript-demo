@@ -16,6 +16,7 @@ const useWhitelist = 'instantWhitelist' in document.body.dataset
 const mousedownShortcut = 'instantMousedownShortcut' in document.body.dataset
 const DELAY_TO_NOT_BE_CONSIDERED_A_TOUCH_INITIATED_ACTION = 1111
 
+
 let delayOnHover = 65
 let useMousedown = false
 let useMousedownOnly = false
