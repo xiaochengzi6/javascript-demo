@@ -1,27 +1,14 @@
-class A {
-  constructor() {
-    this.x = 1;
-  }
-  static print() {
-    console.log(this.x);
+function tranvers(number){
+  number = String(number)
+  let result = ''
+  while(number) {
+    result = number.slice(-3) + (result === '' ? '' : ',') + result 
+    number = number.slice(0, -3)
   }
 
-  print() {
-    console.log('x', this.x)
-  }
+
+
+  return result 
 }
 
-class B extends A {
-  constructor() {
-    super();
-    this.x = 2;
-  }
-  m() {
-    super.print();
-  }
-}
-
-B.x = 3;
-const b = new B()
-
-b.m()
+console.log(tranvers(10000000000))
