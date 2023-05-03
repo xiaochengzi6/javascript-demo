@@ -7,7 +7,7 @@
  *   在 React v18 中，有一种新概念叫做过渡任务，这种任务是对比立即更新任务而产生的
  *   立即更新任务：用户的点击，摁键、输入
  *   所谓的过渡也可以理解为是延后，将优先级调低(调节 setState 更新的优先级)
- *   const [isPending, starTranstion] = useTransition()
+ *   const [isPending, startTransition] = useTransition()
  * 
  * isPending:过渡状态标志
  * startTranstion: 方法

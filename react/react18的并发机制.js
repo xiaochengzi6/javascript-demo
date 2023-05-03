@@ -15,8 +15,7 @@
 
 // mutation 阶段会增删改 dom，before mutation 是在 dom 操作之前，layout 是在 dom 操作之后。
 
-// useEffect 和 useLayoutEffect 的回调也都是在 layout 阶段执行的
-// 只不过 useLayoutEffect 的回调是同步执行，而 useEffect 的回调是异步执行。
+// useLayoutEffect 的回调是在 layout 同步执行，而 useEffect 的回调是在 before mutation 的异步执行。
 
 // 当你 setState 之后，就会触发一次渲染的流程，也就是上面的 render + commit。
 
@@ -101,3 +100,4 @@
 // 总结 ： 所谓的并发执行就是添加了一个  5ms 的时间分片
 // 并不是所有的都要进行时间分片，
 
+                                         

@@ -35,7 +35,9 @@ class Dong extends Component {
 }
 // 打印 
 // render: 0
+// render: 1
 // 1
+// render: 2 
 // 2 
 
 // setState 在 setTimeout 中的表现为 “同步的形式”
@@ -67,8 +69,11 @@ class Dong extends Component {
     }
 }
 
+// react 在源码中使用 `excutionContext` 来标记环境是否是批量执行
+
 /**
  * render: 0
+ * 0
  * 0
  * 0
  * 3
